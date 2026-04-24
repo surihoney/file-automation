@@ -1,0 +1,70 @@
+# ---- OS ----
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- IDE / editors ----
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ---- Env files ----
+.env
+.env.*
+!.env.example
+
+# ---- Logs ----
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# ---- Go / backend ----
+# Local build artifacts produced by `go build`
+backend/main
+backend/file-automation-backend
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Test binaries and coverage
+*.test
+*.out
+coverage.out
+
+# ---- Python / file-processor-service ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Runtime data (keep folders, ignore contents) ----
+uploads/*
+!uploads/.gitkeep
+
+n8n-data/*
+!n8n-data/.gitkeep

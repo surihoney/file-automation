@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+    frontend:
+        build: ./frontend
+        ports:
+            - "5173:5173"
+        volumes:
+            - ./frontend:/app
+            - /app/node_modules
+        environment:
+            - CHOKIDAR_USEPOLLING=true
+        depends_on:
+            - backend
+
+    backend:
+        build: ./backend
+        ports:
+            - "8080:8080"
+        environment:
+            - N8N_WEBHOOK_URL=http://n8n:5678/webhook
+            - FILE_PROCESSOR_SERVICE_URL=http://file-processor-service:5000
+        volumes:
+            - ./uploads:/app/uploads
+        depends_on:
+            - file-processor-service
+            - n8n
+
+    file-processor-service:
+        build: ./file-processor-service
+        ports:
+            - "5000:5000"
+        volumes:
+            - ./uploads:/app/uploads
+
+    n8n:
+        image: n8nio/n8n
+        ports:
+            - "5678:5678"
+        environment:
+            - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:?N8N_ENCRYPTION_KEY is required, set it in .env}
+            - N8N_BASIC_AUTH_ACTIVE=true
+            - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+            - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:?N8N_BASIC_AUTH_PASSWORD is required, set it in .env}
+            - N8N_HOST=localhost
+            - N8N_PORT=5678
+            - N8N_PROTOCOL=http
+            - WEBHOOK_URL=http://localhost:5678/
+        volumes:
+            - ./n8n-data:/home/node/.n8n
+
+    redis:
+        image: redis:7-alpine
+        ports:
+            - "6379:6379"
