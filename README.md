@@ -59,7 +59,7 @@ docker-compose up --build
 - API — http://localhost:8080
 - n8n — http://localhost:5678 (basic auth — see `.env`)
 
-Import an n8n workflow that hits `POST http://file-processor-service:5000/process` and then posts the response to `http://backend:8080/job/update`.
+Import an n8n workflow that hits `POST http://file-processor-service:5000/process` and then posts the response to `http://backend:8080/job/update`. See [`n8n-workflows/README.md`](./n8n-workflows/README.md) for how to export/import.
 
 ## How it scales
 
@@ -79,6 +79,7 @@ file-automation/
 ├── frontend/                 # React + TypeScript UI
 ├── backend/                  # Go API + Redis worker + WebSocket
 ├── file-processor-service/   # Python Flask service (classify + move)
-├── n8n-data/                 # n8n persisted workflows
+├── n8n-workflows/            # exported n8n workflows as JSON (committed)
+├── n8n-data/                 # n8n runtime state (gitignored, disposable)
 └── uploads/                  # shared volume; sorted into category subfolders
 ```

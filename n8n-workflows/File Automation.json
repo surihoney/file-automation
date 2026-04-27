@@ -1,0 +1,216 @@
+{
+  "name": "File Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "file-process",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        -48
+      ],
+      "id": "a8140f5f-f9b7-4a13-a29e-598befd80463",
+      "name": "Receive Job",
+      "webhookId": "1f5b3e4b-ec8c-4e1e-b675-f642e15138ba"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "59976deb-6cdc-49e1-a7d0-192300021c68",
+              "name": "jobId",
+              "value": "={{$json[\"body\"][\"jobId\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f0522a4f-8144-4473-a708-9fa8c5f05b69",
+              "name": "filename",
+              "value": "={{$json[\"body\"][\"filename\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        -48
+      ],
+      "id": "30975184-8b5f-4388-a3eb-1e08dc576e78",
+      "name": "Normalize Job"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://file-processor-service:5000/process",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filename\": \"{{$json.filename}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -160,
+        -192
+      ],
+      "id": "39717ee7-5882-4a64-9e63-e606e452ca88",
+      "name": "Process File"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        64,
+        32
+      ],
+      "id": "b270927f-f852-49c9-a73b-13abaf1ab884",
+      "name": "Merge Job + Result"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21b0e889-3047-4b36-a749-3fe8ade94088",
+              "name": "jobId",
+              "value": "={{$json.jobId}}",
+              "type": "string"
+            },
+            {
+              "id": "9624f95b-56d6-4988-85fc-5d3359b2afa8",
+              "name": "status",
+              "value": "DONE",
+              "type": "string"
+            },
+            {
+              "id": "406ef73b-bcbf-4ec6-aa72-7742f775bede",
+              "name": "category",
+              "value": "={{$json.data.category}}",
+              "type": "string"
+            },
+            {
+              "id": "8cdd98ad-519e-4c91-8f90-4066cf053c36",
+              "name": "newName",
+              "value": "={{$json.data.new_name}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        32
+      ],
+      "id": "7d9ef054-fd1b-4dc7-9222-2163c3fbee26",
+      "name": "Build Callback Payload"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/job/update",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"jobId\": \"{{$json.jobId}}\",\n  \"status\": \"DONE\",\n  \"result\": {\n    \"category\": \"{{$json.category}}\",\n    \"newName\": \"{{$json.newName}}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        32
+      ],
+      "id": "1e116dff-23fc-4f0f-9243-b1cb536402d6",
+      "name": "Notify Backend"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Job": {
+      "main": [
+        [
+          {
+            "node": "Normalize Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Job": {
+      "main": [
+        [
+          {
+            "node": "Process File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Job + Result",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Process File": {
+      "main": [
+        [
+          {
+            "node": "Merge Job + Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Job + Result": {
+      "main": [
+        [
+          {
+            "node": "Build Callback Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Callback Payload": {
+      "main": [
+        [
+          {
+            "node": "Notify Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fdf9d3ea-4828-482c-b7db-354a485d276b",
+  "meta": {
+    "instanceId": "80e413b8ab63fc2d7cb508c3111c3206449b218cecbb5a34d53b151aedcfe6aa"
+  },
+  "id": "gIb8PiFNi9nKo6Oo",
+  "tags": []
+}
